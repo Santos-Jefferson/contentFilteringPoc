@@ -1,0 +1,6 @@
+gradio>=5.0.0
+faster-whisper>=1.1.0
+yt-dlp>=2025.1.0
+
+# Optional: frame-level nudity detection (scene_detection.py)
+# pip install nudenet

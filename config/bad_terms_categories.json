@@ -1,0 +1,272 @@
+{
+  "version": 1,
+  "language": "en",
+  "categories": {
+    "profanity": {
+      "enabled_by_default": true,
+      "word_terms": [
+        "mofo",
+        "fu",
+        "screw",
+        "screwed",
+        "screwing",
+        "douche",
+        "douchebag",
+        "prick",
+        "cunt",
+        "twat",
+        "skank",
+        "ass",
+        "dick",
+        "cock",
+        "pussy",
+        "fuck",
+        "fucked",
+        "fucker",
+        "fucking",
+        "shit",
+        "shitty",
+        "bullshit",
+        "asshole",
+        "bastard",
+        "jackass",
+        "bitch",
+        "motherfucker",
+        "motherfucking",
+        "damn",
+        "dammit",
+        "hell",
+        "goddamn"
+      ],
+      "phrase_terms": [
+        "piece of shit",
+        "son of a bitch",
+        "what the hell"
+      ],
+      "context_exclusions": {
+        "hell": [
+          "heaven"
+        ]
+      }
+    },
+    "blasphemy": {
+      "enabled_by_default": true,
+      "word_terms": [
+        "goddamn",
+        "goddammit",
+        "goddamned",
+        "jesuschrist",
+        "christ"
+      ],
+      "phrase_terms": [
+        "jesus christ",
+        "for god sake",
+        "for gods sake"
+      ]
+    },
+    "childish_language": {
+      "enabled_by_default": true,
+      "word_terms": [
+        "bs",
+        "omg",
+        "geez",
+        "gosh",
+        "crap",
+        "fart",
+        "poop",
+        "pooped",
+        "poopy",
+        "pee",
+        "butt",
+        "butthead",
+        "effin",
+        "freakin",
+        "frickin",
+        "stupid",
+        "idiot",
+        "dumb",
+        "moron",
+        "jerk",
+        "loser",
+        "sucks",
+        "butthole",
+        "tit",
+        "boob",
+        "boobs",
+        "balls",
+        "penis",
+        "vagina"
+      ],
+      "phrase_terms": [
+        "shut up",
+        "you suck",
+        "go away"
+      ]
+    },
+    "racial_bigoted_language": {
+      "enabled_by_default": true,
+      "word_terms": [
+        "nword",
+        "n-word"
+      ]
+    },
+    "sexual_references": {
+      "enabled_by_default": true,
+      "word_terms": [
+        "sex",
+        "sexual",
+        "porno",
+        "porn",
+        "pornography",
+        "prostitute",
+        "hooker",
+        "slut",
+        "whore",
+        "sexy",
+        "hot",
+        "horny",
+        "nude",
+        "naked",
+        "std",
+        "chlamydia",
+        "gonorrhea",
+        "syphilis",
+        "affair",
+        "cheating",
+        "divorce",
+        "flirt",
+        "flirting",
+        "seduce",
+        "seduction"
+      ],
+      "phrase_terms": [
+        "make out",
+        "sleep together",
+        "one night stand"
+      ]
+    }
+  },
+  "scene_detection": {
+    "frame_interval_seconds": 1.0,
+    "nudity_score_threshold": 0.5,
+    "immodesty_score_threshold": 0.3,
+    "categories": {
+      "sex": {
+        "enabled_by_default": false
+      },
+      "sexually_suggestive": {
+        "enabled_by_default": false
+      },
+      "implied_sex": {
+        "enabled_by_default": false
+      },
+      "shown_without_nudity": {
+        "enabled_by_default": false
+      },
+      "shown_with_nudity": {
+        "enabled_by_default": false
+      },
+      "sexual_assault": {
+        "enabled_by_default": true
+      },
+      "nudity_without_sex": {
+        "enabled_by_default": false
+      },
+      "statues_and_paintings": {
+        "enabled_by_default": false
+      },
+      "implied_nudity": {
+        "enabled_by_default": false
+      },
+      "female_male_nudity": {
+        "enabled_by_default": false
+      },
+      "kissing_normal": {
+        "enabled_by_default": false
+      },
+      "kissing_passionate": {
+        "enabled_by_default": false
+      },
+      "immodesty_female": {
+        "enabled_by_default": true
+      },
+      "immodesty_male": {
+        "enabled_by_default": false
+      }
+    },
+    "text_rules": {
+      "sex": [
+        "having sex",
+        "intercourse",
+        "sex scene"
+      ],
+      "sexually_suggestive": [
+        "adult store",
+        "strip club",
+        "lustful",
+        "whistling at",
+        "sex toy"
+      ],
+      "implied_sex": [
+        "slept together",
+        "spent the night",
+        "before sex",
+        "after sex"
+      ],
+      "shown_without_nudity": [
+        "under the sheets",
+        "in bed together"
+      ],
+      "shown_with_nudity": [
+        "naked during sex",
+        "sex while naked"
+      ],
+      "sexual_assault": [
+        "assaulted",
+        "rape",
+        "molestation"
+      ],
+      "nudity_without_sex": [
+        "skinny dipping",
+        "flashing",
+        "mooning",
+        "naked"
+      ],
+      "statues_and_paintings": [
+        "nude statue",
+        "nude painting",
+        "mannequin"
+      ],
+      "implied_nudity": [
+        "undressed",
+        "no clothes",
+        "wrapped in towel"
+      ],
+      "female_male_nudity": [
+        "topless",
+        "genitals",
+        "full nude",
+        "breasts"
+      ],
+      "kissing_normal": [
+        "kissed",
+        "kissing"
+      ],
+      "kissing_passionate": [
+        "french kiss",
+        "making out",
+        "sensual kiss"
+      ],
+      "immodesty_female": [
+        "bikini",
+        "cleavage",
+        "revealing top"
+      ],
+      "immodesty_male": [
+        "speedo",
+        "briefs",
+        "formfitting underwear"
+      ]
+    }
+  }
+}
