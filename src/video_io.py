@@ -287,3 +287,28 @@ def burn_subtitles(video_path: Path, srt_path: Path, output_path: Path) -> Path:
     if not output_path.exists():
         raise RuntimeError(f"Subtitle-burn output was not generated: {output_path}")
     return output_path
+
+
+def extract_frame_at_timestamp(video_path: Path, output_path: Path, timestamp_seconds: float) -> Path:
+    video_path = video_path.resolve()
+    output_path = output_path.resolve()
+    if not video_path.exists():
+        raise FileNotFoundError(f"Input video not found for frame extraction: {video_path}")
+
+    ts = max(0.0, float(timestamp_seconds))
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-ss",
+        f"{ts:.3f}",
+        "-i",
+        str(video_path),
+        "-frames:v",
+        "1",
+        str(output_path),
+    ]
+    _run_ffmpeg(cmd)
+    if not output_path.exists():
+        raise RuntimeError(f"Frame extraction failed: {output_path}")
+    return output_path
+

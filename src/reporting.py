@@ -43,6 +43,9 @@ def write_report(
                 "end": round(e.end, 3),
                 "score": round(e.score, 4),
                 "source": e.source,
+                "detected_value": round(e.detected_value, 4),
+                "threshold_used": round(e.threshold_used, 4),
+                "reason": e.reason,
             }
             for e in scene_events_list
         ],
@@ -65,7 +68,16 @@ def write_report(
     with scene_csv_path.open("w", newline="", encoding="utf-8") as csv_file:
         writer = csv.DictWriter(
             csv_file,
-            fieldnames=["category", "start", "end", "score", "source"],
+            fieldnames=[
+                "category",
+                "start",
+                "end",
+                "score",
+                "source",
+                "detected_value",
+                "threshold_used",
+                "reason",
+            ],
         )
         writer.writeheader()
         for item in report_json["scene_events"]:

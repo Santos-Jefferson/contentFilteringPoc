@@ -34,5 +34,8 @@ class SceneDetectionEvent:
     end: float
     score: float
     source: str
+    detected_value: float = 0.0
+    threshold_used: float = 0.0
+    reason: str = ""
 
 

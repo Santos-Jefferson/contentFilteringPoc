@@ -10,7 +10,11 @@ This POC downloads a video from a URL, transcribes English speech with word time
 - Configurable mute padding (before/after each detected bad word)
 - Category-based filtering loaded from `config/bad_terms_categories.json`
 - Scene-detection categories (transcript cues + optional frame sampling)
+- Collapsed category groups with per-group select-all toggles
+- VidAngel-style violence scene taxonomy (implied, non-graphic, graphic, gore, disturbing images, animal violence)
+- ML-based violence frame detection (CLIP zero-shot labels) with per-category thresholds
 - Strong blur on detected scene intervals (configurable intensity)
+- Frame evidence gallery with per-event reason and threshold vs detected value
 - Masked captions (`***`) burned into the output video
 - JSON + CSV report of actual filtered words and timings
 
@@ -39,7 +43,19 @@ Edit `config/bad_terms_categories.json` to manage bad terms and categories, then
 
 You can also select scene-detection categories, mute detected scene intervals, and apply strong blur to those same intervals.
 
+The Gradio UI focuses on URL input first, with collapsed category groups for quick selection and subcategory checkboxes.
+
+Violence categories are detected from transcript cues defined in `scene_detection.text_rules` and can be tuned in the config file.
+For visual violence categories, the app supports two backends via `scene_detection.violence_backend`:
+
+- `clip` (uses `violence_model_name`)
+- `qwen_vl` (uses `violence_qwen_model_name`)
+
+Both backends apply per-category thresholds (for example `violence_graphic_threshold`) plus a neutral-scene margin gate (`violence_score_margin_threshold`) to reduce false positives.
+
 Use the **Mute padding per word (seconds)** slider to tune how much audio is muted around each detected word. If a word is detected but still audible, increase this value.
+
+Use **Reload from config** to refresh category lists and threshold values from the selected config file without restarting Gradio. You can edit all threshold/interval values directly in the JSON overrides box.
 
 Frame-based nudity detection is optional and requires:
 
@@ -58,6 +74,7 @@ Each run writes to `artifacts/<job_id>/`:
 - `filtered_report.json`
 - `filtered_occurrences.csv`
 - `scene_events.csv`
+- `scene_gallery/` (representative flagged frames for manual review)
 - `blurred.mp4` (only when scene blur is enabled and scene spans are detected)
 
 ## Smoke Test (no heavy dependencies)

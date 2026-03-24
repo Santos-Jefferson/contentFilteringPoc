@@ -4,8 +4,10 @@ import tempfile
 from src.filtering import find_filtered_occurrences, mask_text, parse_bad_terms
 from src.models import TranscriptSegment, WordToken
 from src.reporting import write_report
+from src.scene_detection import detect_scene_events
 from src.subtitle_utils import write_masked_srt
 from src.term_config import (
+    get_scene_detection_config,
     get_default_scene_categories,
     get_scene_category_names,
     load_term_config,
@@ -29,6 +31,9 @@ def main() -> None:
     assert "sexual_assault" in scene_names
     assert "sexual_assault" in scene_defaults
     assert "immodesty_female" in scene_defaults
+    assert "violence_implied" in scene_names
+    assert "violence_graphic" in scene_names
+    assert "violence_gore" in scene_names
 
     terms = parse_bad_terms("damn,hell,pooped")
     segments = [
@@ -121,6 +126,42 @@ def main() -> None:
     you_suck = next(o for o in phrase_occurrences if o.normalized_word == "you suck")
     assert round(you_suck.start, 2) == 3.10  # 3.15 - 0.05
     assert round(you_suck.end, 2) == 3.65   # 3.6 + 0.05
+
+    # ── violence transcript cues ───────────────────────────────────────────
+    violence_segments = [
+        TranscriptSegment(
+            start=0.0,
+            end=2.0,
+            text="The witness gave a graphic description of violence and detailed talk of suicide",
+            words=[],
+        ),
+        TranscriptSegment(
+            start=2.0,
+            end=4.0,
+            text="There was blood splatter and a bloody body in the room",
+            words=[],
+        ),
+        TranscriptSegment(
+            start=4.0,
+            end=6.0,
+            text="The scene showed brain matter after someone was decapitated",
+            words=[],
+        ),
+    ]
+    violence_events = detect_scene_events(
+        Path("."),
+        violence_segments,
+        get_scene_detection_config(config),
+        ["violence_implied", "violence_graphic", "violence_gore"],
+    )
+    event_categories = {event.category for event in violence_events}
+    assert "violence_implied" in event_categories
+    assert "violence_graphic" in event_categories
+    assert "violence_gore" in event_categories
+    implied_event = next(event for event in violence_events if event.category == "violence_implied")
+    assert implied_event.detected_value == 1.0
+    assert implied_event.threshold_used == 1.0
+    assert "Transcript cue matched" in implied_event.reason
 
     with tempfile.TemporaryDirectory() as tmp:
         tmp_path = Path(tmp)

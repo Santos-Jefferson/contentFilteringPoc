@@ -148,8 +148,19 @@
   },
   "scene_detection": {
     "frame_interval_seconds": 1.0,
+    "violence_frame_interval_seconds": 1.0,
     "nudity_score_threshold": 0.5,
     "immodesty_score_threshold": 0.3,
+    "violence_backend": "qwen_vl",
+    "violence_model_name": "openai/clip-vit-base-patch32",
+    "violence_qwen_model_name": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "violence_qwen_max_new_tokens": 220,
+    "violence_score_margin_threshold": 0.1,
+    "violence_non_graphic_threshold": 0.45,
+    "violence_graphic_threshold": 0.4,
+    "violence_gore_threshold": 0.35,
+    "violence_disturbing_images_threshold": 0.4,
+    "violence_animal_violence_threshold": 0.4,
     "categories": {
       "sex": {
         "enabled_by_default": false
@@ -191,6 +202,24 @@
         "enabled_by_default": true
       },
       "immodesty_male": {
+        "enabled_by_default": false
+      },
+      "violence_implied": {
+        "enabled_by_default": false
+      },
+      "violence_non_graphic": {
+        "enabled_by_default": false
+      },
+      "violence_graphic": {
+        "enabled_by_default": false
+      },
+      "violence_gore": {
+        "enabled_by_default": false
+      },
+      "violence_disturbing_images": {
+        "enabled_by_default": false
+      },
+      "violence_animal_violence": {
         "enabled_by_default": false
       }
     },
@@ -266,6 +295,57 @@
         "speedo",
         "briefs",
         "formfitting underwear"
+      ],
+      "violence_implied": [
+        "graphic description of violence",
+        "detailed talk of suicide",
+        "commit suicide",
+        "kill yourself",
+        "threatening language"
+      ],
+      "violence_non_graphic": [
+        "punched",
+        "kicked",
+        "shot",
+        "stabbed",
+        "fight broke out",
+        "knife to throat",
+        "hanging from helicopter",
+        "hanging from moving vehicle",
+        "hanging from ledge"
+      ],
+      "violence_graphic": [
+        "bloody injury",
+        "blood splatter",
+        "spraying blood",
+        "bloody body",
+        "impaled",
+        "burning body",
+        "dripping blood",
+        "caked with blood"
+      ],
+      "violence_gore": [
+        "disemboweled",
+        "decapitated",
+        "severed body part",
+        "severed head",
+        "guts spilled",
+        "brain matter",
+        "shattered skull"
+      ],
+      "violence_disturbing_images": [
+        "extremely gross scars",
+        "object protruding from body",
+        "mass grave",
+        "burning on pyre",
+        "dead child",
+        "dead teenager"
+      ],
+      "violence_animal_violence": [
+        "animal abuse",
+        "animal cruelty",
+        "animal tortured",
+        "animal killed"
       ]
     }
   }

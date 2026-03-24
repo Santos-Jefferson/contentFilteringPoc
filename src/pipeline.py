@@ -19,9 +19,42 @@ from src.video_io import (
     blur_occurrences_in_video,
     burn_subtitles,
     download_video_from_url,
+    extract_frame_at_timestamp,
     extract_audio_wav,
     mute_occurrences_in_audio,
 )
+
+
+def _build_scene_gallery(
+    input_video: Path,
+    scene_events: list,
+    gallery_dir: Path,
+    max_items: int = 30,
+) -> list[tuple[str, str]]:
+    gallery_dir.mkdir(parents=True, exist_ok=True)
+    items: list[tuple[str, str]] = []
+    for idx, event in enumerate(scene_events[:max_items], start=1):
+        midpoint = max(0.0, (event.start + event.end) / 2.0)
+        frame_path = gallery_dir / f"scene_{idx:03d}_{event.category}.jpg"
+        try:
+            extract_frame_at_timestamp(input_video, frame_path, midpoint)
+        except Exception:
+            continue
+        caption = (
+            f"{event.category} | {event.source} | "
+            f"detected={event.detected_value:.3f} threshold={event.threshold_used:.3f} | "
+            f"t={event.start:.2f}-{event.end:.2f}s | {event.reason}"
+        )
+        items.append((str(frame_path), caption))
+    return items
+
+
+def _collect_effective_scene_thresholds(scene_config: dict) -> dict[str, float]:
+    collected: dict[str, float] = {}
+    for key, value in scene_config.items():
+        if isinstance(value, (int, float)) and ("threshold" in key or "interval" in key):
+            collected[key] = float(value)
+    return dict(sorted(collected.items()))
 
 
 def process_video_url(
@@ -34,8 +67,12 @@ def process_video_url(
     mute_scene_audio: bool = False,
     blur_scene_video: bool = True,
     blur_strength: float = 40.0,
+    scene_nudity_threshold: float | None = None,
+    scene_immodesty_threshold: float | None = None,
+    scene_frame_interval_seconds: float | None = None,
+    scene_threshold_overrides: dict[str, float] | None = None,
     artifacts_root: str = "artifacts",
-) -> tuple[str, str, str]:
+) -> tuple[str, str, str, list[tuple[str, str]]]:
     if not video_url.strip():
         raise ValueError("Please provide a video URL.")
 
@@ -60,7 +97,27 @@ def process_video_url(
         model_size=model_size,
     )
 
-    scene_config = get_scene_detection_config(config)
+    scene_config = dict(get_scene_detection_config(config) or {})
+    if scene_nudity_threshold is not None:
+        scene_config["nudity_score_threshold"] = min(0.99, max(0.01, float(scene_nudity_threshold)))
+    if scene_immodesty_threshold is not None:
+        scene_config["immodesty_score_threshold"] = min(
+            0.99, max(0.01, float(scene_immodesty_threshold))
+        )
+    if scene_frame_interval_seconds is not None:
+        scene_config["frame_interval_seconds"] = max(0.1, float(scene_frame_interval_seconds))
+    if scene_threshold_overrides:
+        for key, value in scene_threshold_overrides.items():
+            try:
+                numeric = float(value)
+            except (TypeError, ValueError):
+                continue
+            if "threshold" in key:
+                scene_config[key] = min(0.99, max(0.01, numeric))
+            elif "interval" in key:
+                scene_config[key] = max(0.05, numeric)
+            else:
+                scene_config[key] = numeric
     pipeline_warnings: list[str] = []
     with warnings.catch_warnings(record=True) as caught_warnings:
         warnings.simplefilter("always", RuntimeWarning)
@@ -109,6 +166,7 @@ def process_video_url(
         job_dir,
         scene_events=scene_events,
     )
+    scene_gallery_items = _build_scene_gallery(input_video, scene_events, job_dir / "scene_gallery")
 
     report_summary = {
         "job_id": job_id,
@@ -126,6 +184,14 @@ def process_video_url(
         "counts": report_dict["counts"],
         "scene_total": report_dict.get("scene_total", 0),
         "scene_by_category": report_dict.get("scene_by_category", {}),
+        "scene_gallery_dir": str(job_dir / "scene_gallery"),
+        "scene_gallery_count": len(scene_gallery_items),
+        "effective_scene_config": _collect_effective_scene_thresholds(scene_config),
         "warnings": pipeline_warnings,
     }
-    return str(output_video), json.dumps(report_summary, indent=2), str(report_dict["counts"])
+    return (
+        str(output_video),
+        json.dumps(report_summary, indent=2),
+        str(report_dict["counts"]),
+        scene_gallery_items,
+    )
