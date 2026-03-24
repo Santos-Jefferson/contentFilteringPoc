@@ -1,4 +1,6 @@
+import os
 import shutil
+import ssl
 import subprocess
 import urllib.parse
 import urllib.request
@@ -17,6 +19,73 @@ _DIRECT_VIDEO_EXTENSIONS = {
     ".mpeg",
     ".mpg",
 }
+
+
+def _is_enabled_env(name: str) -> bool:
+    raw = os.environ.get(name, "")
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _should_disable_ssl_verification() -> bool:
+    return _is_enabled_env("CONTENT_FILTERING_INSECURE_SSL") or _is_enabled_env("CONTENT_FILTER_INSECURE_SSL")
+
+
+def _get_yt_dlp_cookies_file() -> str | None:
+    """Return the path from YT_DLP_COOKIES_FILE if set and the file exists."""
+    raw = os.environ.get("YT_DLP_COOKIES_FILE", "").strip()
+    if not raw:
+        return None
+    path = Path(raw).expanduser().resolve()
+    if not path.exists():
+        raise FileNotFoundError(
+            "YT_DLP_COOKIES_FILE is set but the file does not exist: "
+            f"{path}. In Kubernetes/headless environments, mount a Netscape-format "
+            "cookies.txt and point YT_DLP_COOKIES_FILE to that mounted path."
+        )
+    return str(path)
+
+
+def _get_yt_dlp_cookies_from_browser() -> str | None:
+    """Return the browser name from YT_DLP_COOKIES_FROM_BROWSER if set."""
+    raw = os.environ.get("YT_DLP_COOKIES_FROM_BROWSER", "").strip().lower()
+    return raw or None
+
+
+def _is_auth_required_error(exc: Exception) -> bool:
+    """Return True when the yt-dlp error message indicates bot/auth gating."""
+    message = str(exc).lower()
+    return any(token in message for token in ("sign in", "cookies", "bot", "login required"))
+
+
+def _is_unsupported_cookie_platform_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return "unsupported platform" in message and "linux" in message
+
+
+def _build_ssl_context() -> ssl.SSLContext:
+    if _should_disable_ssl_verification():
+        return ssl._create_unverified_context()
+
+    context = ssl.create_default_context()
+    try:
+        import certifi
+
+        context.load_verify_locations(cafile=certifi.where())
+    except Exception:
+        # Keep platform defaults when certifi is unavailable.
+        pass
+    return context
+
+
+def _is_certificate_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    ssl_tokens = (
+        "certificate verify failed",
+        "certificateverifyfailed",
+        "unable to get local issuer certificate",
+        "ssl",
+    )
+    return any(token in message for token in ssl_tokens)
 
 
 def _run_ffmpeg(cmd: list[str], cwd: Path | None = None) -> None:
@@ -67,6 +136,75 @@ def _is_same_file(path_a: Path, path_b: Path) -> bool:
         return path_a.resolve() == path_b.resolve()
 
 
+def _download_via_yt_dlp(video_url: str, work_dir: Path, output_path: Path) -> tuple[Path | None, Exception | None]:
+    """Try yt-dlp with a bounded retry plan for auth-gated YouTube failures."""
+    from yt_dlp import YoutubeDL
+
+    base_options = {
+        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "outtmpl": str(work_dir / "input_video.%(ext)s"),
+        "merge_output_format": "mp4",
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+        "nocheckcertificate": _should_disable_ssl_verification(),
+    }
+
+    cookies_file = _get_yt_dlp_cookies_file()
+    if cookies_file:
+        base_options["cookiefile"] = cookies_file
+    else:
+        browser = _get_yt_dlp_cookies_from_browser()
+        if browser:
+            # yt-dlp expects a tuple: (browser_name,) or (browser_name, profile, keyring, container)
+            base_options["cookiesfrombrowser"] = (browser,)
+
+    attempts: list[tuple[str, dict]] = [
+        ("default", {}),
+        (
+            "youtube_auth_fallback",
+            {
+                "extractor_args": {
+                    "youtube": {
+                        "player_client": ["ios", "android", "web"],
+                    }
+                }
+            },
+        ),
+    ]
+
+    attempt_errors: list[str] = []
+    for stage, extra in attempts:
+        options = dict(base_options)
+        options.update(extra)
+        try:
+            with YoutubeDL(options) as ydl:
+                info = ydl.extract_info(video_url, download=True)
+                file_path = ydl.prepare_filename(info)
+                path = Path(file_path)
+                if path.suffix != ".mp4":
+                    mp4_candidate = path.with_suffix(".mp4")
+                    if mp4_candidate.exists():
+                        path = mp4_candidate
+
+                if _is_same_file(path, output_path):
+                    _validate_video_file(output_path)
+                    return output_path, None
+
+                shutil.copy2(path, output_path)
+                _validate_video_file(output_path)
+                return output_path, None
+        except Exception as exc:
+            attempt_errors.append(f"{stage}: {exc}")
+            # Extra attempts only help for auth/bot-gated errors.
+            if not _is_auth_required_error(exc):
+                break
+
+    if not attempt_errors:
+        return None, None
+    return None, RuntimeError("; ".join(attempt_errors))
+
+
 def download_video_from_url(video_url: str, work_dir: Path) -> Path:
     parsed = urllib.parse.urlparse(video_url)
 
@@ -85,39 +223,22 @@ def download_video_from_url(video_url: str, work_dir: Path) -> Path:
 
     # Preferred approach for hosted video pages and signed URLs.
     try:
-        from yt_dlp import YoutubeDL
-
-        options = {
-            "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "outtmpl": str(work_dir / "input_video.%(ext)s"),
-            "merge_output_format": "mp4",
-            "quiet": True,
-            "no_warnings": True,
-            "noplaylist": True,
-        }
-        with YoutubeDL(options) as ydl:
-            info = ydl.extract_info(video_url, download=True)
-            file_path = ydl.prepare_filename(info)
-            path = Path(file_path)
-            if path.suffix != ".mp4":
-                # yt-dlp may keep original extension depending on source.
-                mp4_candidate = path.with_suffix(".mp4")
-                if mp4_candidate.exists():
-                    path = mp4_candidate
-            if _is_same_file(path, output_path):
-                _validate_video_file(output_path)
-                return output_path
-
-            shutil.copy2(path, output_path)
-            _validate_video_file(output_path)
-            return output_path
+        downloaded, yt_dlp_error = _download_via_yt_dlp(video_url, work_dir, output_path)
+        if downloaded is not None:
+            return downloaded
+    except FileNotFoundError as exc:
+        # Config errors (like a missing cookies file) should fail fast and stay actionable.
+        raise RuntimeError(str(exc)) from exc
     except Exception as exc:
         yt_dlp_error = exc
 
     # Fallback only for direct downloadable file URLs.
     request = urllib.request.Request(video_url, headers={"User-Agent": "Mozilla/5.0"})
+    ssl_context = _build_ssl_context()
     try:
-        with urllib.request.urlopen(request) as response, output_path.with_suffix(".part").open("wb") as out_file:
+        with urllib.request.urlopen(request, context=ssl_context) as response, output_path.with_suffix(".part").open(
+            "wb"
+        ) as out_file:
             content_type = response.headers.get_content_type() or ""
             if not content_type.startswith("video/") and not _is_direct_media_link(parsed):
                 raise RuntimeError(
@@ -128,14 +249,40 @@ def download_video_from_url(video_url: str, work_dir: Path) -> Path:
         _validate_video_file(output_path)
         return output_path
     except Exception as fallback_error:
+        insecure_hint = (
+            " If this environment has custom/intercepted TLS certs, install/update trust roots or try "
+            "CONTENT_FILTERING_INSECURE_SSL=1 as a temporary workaround."
+        )
         if yt_dlp_error is not None:
+            suffix = ""
+            if not _should_disable_ssl_verification() and (
+                _is_certificate_error(yt_dlp_error) or _is_certificate_error(fallback_error)
+            ):
+                suffix = insecure_hint
+            elif _is_unsupported_cookie_platform_error(yt_dlp_error):
+                suffix = (
+                    " Browser-cookie mode is unsupported in this runtime (for example, safari on Linux). "
+                    "In Kubernetes/headless environments, use YT_DLP_COOKIES_FILE=/path/to/cookies.txt "
+                    "with a Netscape-format cookies export instead of YT_DLP_COOKIES_FROM_BROWSER."
+                )
+            elif _is_auth_required_error(yt_dlp_error):
+                suffix = (
+                    " YouTube requires authentication to download this video. "
+                    "Export your browser cookies to a Netscape-format file and set "
+                    "YT_DLP_COOKIES_FILE=/path/to/cookies.txt, or set "
+                    "YT_DLP_COOKIES_FROM_BROWSER=chrome (or firefox/safari) to read "
+                    "cookies directly from your browser profile."
+                )
             raise RuntimeError(
                 "Could not download a valid video from this URL. "
                 f"yt-dlp failed with: {yt_dlp_error}. "
-                f"Direct-download fallback failed with: {fallback_error}."
+                f"Direct-download fallback failed with: {fallback_error}.{suffix}"
             ) from fallback_error
+        suffix = ""
+        if not _should_disable_ssl_verification() and _is_certificate_error(fallback_error):
+            suffix = insecure_hint
         raise RuntimeError(
-            f"Could not download a valid video from this URL: {fallback_error}"
+            f"Could not download a valid video from this URL: {fallback_error}{suffix}"
         ) from fallback_error
 
 

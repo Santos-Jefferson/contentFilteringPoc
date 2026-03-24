@@ -5,3 +5,4 @@ transformers>=4.47.0
 torch>=2.2.0
 Pillow>=10.0.0
 nudenet
+certifi>=2024.0.0

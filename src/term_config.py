@@ -3,6 +3,10 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Set, Tuple
 
 from src.filtering import normalize_word
+from src.models import ProcessingProfile
+
+
+MANUAL_PROFILE_NAME = "manual_custom"
 
 
 def load_term_config(config_path: str) -> dict:
@@ -10,6 +14,11 @@ def load_term_config(config_path: str) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"Filter config not found: {path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def get_config_language(config: dict) -> str:
+    language = str(config.get("language", "en")).strip().lower()
+    return language or "en"
 
 
 def get_category_names(config: dict) -> List[str]:
@@ -84,4 +93,65 @@ def get_default_scene_categories(config: dict) -> List[str]:
 
 def get_scene_detection_config(config: dict) -> dict:
     return config.get("scene_detection", {})
+
+
+def get_processing_profile_names(config: dict) -> List[str]:
+    profiles = config.get("processing_profiles", {})
+    return sorted(name for name, payload in profiles.items() if isinstance(payload, dict))
+
+
+def get_default_processing_profile_name(config: dict) -> str:
+    configured = str(config.get("default_processing_profile", "")).strip()
+    available = set(get_processing_profile_names(config))
+    if configured and configured in available:
+        return configured
+    return MANUAL_PROFILE_NAME
+
+
+def _coerce_valid_names(candidates: Iterable[str], allowed: Set[str]) -> List[str]:
+    resolved: List[str] = []
+    seen: Set[str] = set()
+    for raw in candidates or []:
+        name = str(raw).strip()
+        if not name or name not in allowed or name in seen:
+            continue
+        resolved.append(name)
+        seen.add(name)
+    return resolved
+
+
+def resolve_processing_profile(config: dict, profile_name: str | None = None) -> ProcessingProfile:
+    categories = set(get_category_names(config))
+    scene_categories = set(get_scene_category_names(config))
+
+    selected_name = str(profile_name or "").strip() or get_default_processing_profile_name(config)
+    if selected_name == MANUAL_PROFILE_NAME:
+        return ProcessingProfile(
+            name=MANUAL_PROFILE_NAME,
+            description="Use the current config defaults and adjust selections manually in the UI or batch manifest.",
+            selected_categories=get_default_categories(config),
+            selected_scene_categories=get_default_scene_categories(config),
+            mute_scene_audio=False,
+            blur_scene_video=True,
+            emit_output_video=True,
+            emit_masked_subtitles=True,
+            emit_scene_gallery=True,
+        )
+
+    payload = config.get("processing_profiles", {}).get(selected_name)
+    if not isinstance(payload, dict):
+        raise ValueError(f"Unknown processing profile: {selected_name}")
+
+    return ProcessingProfile(
+        name=selected_name,
+        description=str(payload.get("description", "")).strip(),
+        selected_categories=_coerce_valid_names(payload.get("selected_categories", []), categories),
+        selected_scene_categories=_coerce_valid_names(payload.get("selected_scene_categories", []), scene_categories),
+        mute_scene_audio=bool(payload.get("mute_scene_audio", False)),
+        blur_scene_video=bool(payload.get("blur_scene_video", False)),
+        emit_output_video=bool(payload.get("emit_output_video", True)),
+        emit_masked_subtitles=bool(payload.get("emit_masked_subtitles", True)),
+        emit_scene_gallery=bool(payload.get("emit_scene_gallery", True)),
+    )
+
 

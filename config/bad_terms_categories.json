@@ -1,6 +1,60 @@
 {
   "version": 1,
   "language": "en",
+  "default_processing_profile": "language_first_mvp",
+  "processing_profiles": {
+    "language_first_mvp": {
+      "description": "Prioritize language cleanup and keep scene detection off for the fastest consumer-facing MVP path.",
+      "selected_categories": [
+        "profanity",
+        "blasphemy",
+        "childish_language",
+        "racial_bigoted_language",
+        "sexual_references"
+      ],
+      "selected_scene_categories": [],
+      "mute_scene_audio": false,
+      "blur_scene_video": false,
+      "emit_output_video": true,
+      "emit_masked_subtitles": true,
+      "emit_scene_gallery": false
+    },
+    "catalog_review_fast": {
+      "description": "Generate transcript-derived reports and masked subtitles for catalog triage without rendering a final censored video.",
+      "selected_categories": [
+        "profanity",
+        "blasphemy",
+        "childish_language",
+        "racial_bigoted_language",
+        "sexual_references"
+      ],
+      "selected_scene_categories": [],
+      "mute_scene_audio": false,
+      "blur_scene_video": false,
+      "emit_output_video": false,
+      "emit_masked_subtitles": true,
+      "emit_scene_gallery": false
+    },
+    "balanced_scene_review": {
+      "description": "Keep the current filtered-video workflow but limit scene review to the default sex/nudity categories for manual follow-up.",
+      "selected_categories": [
+        "profanity",
+        "blasphemy",
+        "childish_language",
+        "racial_bigoted_language",
+        "sexual_references"
+      ],
+      "selected_scene_categories": [
+        "sexual_assault",
+        "immodesty_female"
+      ],
+      "mute_scene_audio": false,
+      "blur_scene_video": true,
+      "emit_output_video": true,
+      "emit_masked_subtitles": true,
+      "emit_scene_gallery": true
+    }
+  },
   "categories": {
     "profanity": {
       "enabled_by_default": true,

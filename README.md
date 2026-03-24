@@ -41,6 +41,8 @@ Open the Gradio URL shown in your terminal.
 
 Edit `config/bad_terms_categories.json` to manage bad terms and categories, then select categories in the UI instead of typing terms manually.
 
+The UI now supports config-driven **processing profiles**. The default profile (`language_first_mvp`) keeps the MVP focused on language cleanup first, while `catalog_review_fast` skips final video rendering so you can triage titles asynchronously and build a catalog faster.
+
 You can also select scene-detection categories, mute detected scene intervals, and apply strong blur to those same intervals.
 
 The Gradio UI focuses on URL input first, with collapsed category groups for quick selection and subcategory checkboxes.
@@ -84,4 +86,44 @@ python3 smoke_test.py
 ```
 
 This only validates parsing/masking/report logic with synthetic transcript data.
+
+## Batch manifest mode
+
+To process many titles asynchronously and build catalog artifacts, create a JSON manifest with shared defaults plus a `jobs` array:
+
+```json
+{
+  "defaults": {
+	"processing_profile": "catalog_review_fast",
+	"model_size": "tiny"
+  },
+  "jobs": [
+	{
+	  "title": "Example Show S01E01",
+	  "source_id": "example-s01e01",
+	  "video_url": "https://example.com/video.mp4"
+	}
+  ]
+}
+```
+
+Run it with:
+
+```bash
+python3 batch_manifest.py manifest.json --concurrency 2
+```
+
+This writes normal per-job artifacts plus a batch summary JSON under `artifacts/batches/<batch_id>/batch_summary.json`.
+
+## SSL download troubleshooting
+
+If video download fails with errors like `CERTIFICATE_VERIFY_FAILED`, first update your environment trust store and reinstall dependencies so `certifi` is available.
+
+As a temporary workaround in restricted/proxied environments, you can disable TLS certificate checks for downloads:
+
+```bash
+CONTENT_FILTERING_INSECURE_SSL=1 python3 main.py
+```
+
+Use this only when necessary.
 

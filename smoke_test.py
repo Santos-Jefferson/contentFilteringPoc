@@ -1,16 +1,21 @@
 from pathlib import Path
 import tempfile
+import json
 
+from src.batch_runner import load_manifest
 from src.filtering import find_filtered_occurrences, mask_text, parse_bad_terms
 from src.models import TranscriptSegment, WordToken
 from src.reporting import write_report
 from src.scene_detection import detect_scene_events
 from src.subtitle_utils import write_masked_srt
 from src.term_config import (
+    get_default_processing_profile_name,
     get_scene_detection_config,
     get_default_scene_categories,
+    get_processing_profile_names,
     get_scene_category_names,
     load_term_config,
+    resolve_processing_profile,
     resolve_terms_from_categories,
 )
 
@@ -28,12 +33,24 @@ def main() -> None:
 
     scene_names = get_scene_category_names(config)
     scene_defaults = get_default_scene_categories(config)
+    profile_names = get_processing_profile_names(config)
+    default_profile_name = get_default_processing_profile_name(config)
+    default_profile = resolve_processing_profile(config, default_profile_name)
     assert "sexual_assault" in scene_names
     assert "sexual_assault" in scene_defaults
     assert "immodesty_female" in scene_defaults
     assert "violence_implied" in scene_names
     assert "violence_graphic" in scene_names
     assert "violence_gore" in scene_names
+    assert "language_first_mvp" in profile_names
+    assert default_profile_name == "language_first_mvp"
+    assert default_profile.blur_scene_video is False
+    assert default_profile.emit_output_video is True
+
+    review_profile = resolve_processing_profile(config, "catalog_review_fast")
+    assert review_profile.emit_output_video is False
+    assert review_profile.emit_scene_gallery is False
+    assert "sexual_references" in review_profile.selected_categories
 
     terms = parse_bad_terms("damn,hell,pooped")
     segments = [
@@ -178,6 +195,32 @@ def main() -> None:
         srt_text = srt.read_text(encoding="utf-8")
         assert "pooped" not in srt_text.lower()
         assert "***" in srt_text
+
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(
+            json.dumps(
+                {
+                    "defaults": {
+                        "processing_profile": "catalog_review_fast",
+                        "model_size": "tiny",
+                    },
+                    "jobs": [
+                        {
+                            "title": "Pilot",
+                            "source_id": "show-s01e01",
+                            "video_url": "https://example.com/video.mp4",
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        manifest_payload, manifest_entries = load_manifest(str(manifest_path))
+        assert manifest_payload["defaults"]["processing_profile"] == "catalog_review_fast"
+        assert len(manifest_entries) == 1
+        assert manifest_entries[0].processing_profile == "catalog_review_fast"
+        assert manifest_entries[0].model_size == "tiny"
+        assert manifest_entries[0].title == "Pilot"
 
     print("Smoke test passed")
 

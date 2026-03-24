@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="e202ede9-a614-4e4b-bcb0-9af64fd28592" name="Changes" comment="add initial content filtering files and structure">
+    <list default="true" id="e202ede9-a614-4e4b-bcb0-9af64fd28592" name="Changes" comment="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (master)">
+      <change afterPath="$PROJECT_DIR$/AGENTS.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/batch_manifest.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/batch_runner.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/contentFilteringPoc.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/contentFilteringPoc.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/bad_terms_categories.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/bad_terms_categories.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smoke_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/smoke_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/term_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/term_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/video_io.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/video_io.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -20,7 +36,7 @@
     <option name="chatModeId" value="Agent" />
   </component>
   <component name="EmbeddingIndexingInfo">
-    <option name="cachedIndexableFilesCount" value="24" />
+    <option name="cachedIndexableFilesCount" value="31" />
     <option name="fileBasedEmbeddingIndicesEnabled" value="true" />
   </component>
   <component name="Git.Settings">
@@ -37,6 +53,18 @@
     &quot;url&quot;: &quot;https://github.com/Santos-Jefferson/contentFilteringPoc.git&quot;,
     &quot;accountId&quot;: &quot;e63bb271-a277-4fac-8f22-2136b092c782&quot;
   }
+}</component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;configuredContexts&quot;: [
+    {
+      &quot;name&quot;: &quot;sip-eks-mcap-use-dev-default-eks_sip-eks-mcap-use-dev&quot;,
+      &quot;kubeConfigUrl&quot;: &quot;file:///Users/jsan0043/Downloads/K8Conf/k8s-sip-eks-mcap-use-dev-default-conf&quot;,
+      &quot;originalNamespace&quot;: &quot;mcap-use-dev-airflow&quot;,
+      &quot;currentNamespace&quot;: &quot;python-dev-env&quot;
+    }
+  ],
+  &quot;isMigrated&quot;: true
 }</component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -66,8 +94,12 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.github.copilot.settings.chat.ChatConfigurable&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -119,6 +151,10 @@
       <updated>1774240992839</updated>
       <workItem from="1774240993860" duration="17664000" />
       <workItem from="1774362853759" duration="145000" />
+      <workItem from="1774363008435" duration="5247000" />
+      <workItem from="1774369741238" duration="15000" />
+      <workItem from="1774381631921" duration="3056000" />
+      <workItem from="1774384713422" duration="407000" />
     </task>
     <task id="LOCAL-00001" summary="initialize content filtering POC with basic structure and dependencies">
       <option name="closed" value="true" />
@@ -128,18 +164,50 @@
       <option name="project" value="LOCAL" />
       <updated>1774250146162</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (master)">
+      <option name="closed" value="true" />
+      <created>1774363061006</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774363061006</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="initialize content filtering POC with basic structure and dependencies" />
-    <option name="LAST_COMMIT_MESSAGE" value="initialize content filtering POC with basic structure and dependencies" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;content" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilter" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFiltering" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringP" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc." />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment." />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (master" />
+    <MESSAGE value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (master)" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore(api): update Python SDK version to 3.14&#10;&#10;Updated Python SDK version to 3.14 in project configuration files for&#10;contentFilteringPoc. This update may provide bug fixes or new features&#10;in Python environment. (master)" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/contentFilteringPoc$main.coverage" NAME="main Coverage Results" MODIFIED="1774362990876" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/contentFilteringPoc$main.coverage" NAME="main Coverage Results" MODIFIED="1774384895772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="github-copilot-workspace">
     <instructionFileLocations>
